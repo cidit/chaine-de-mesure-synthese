@@ -1,0 +1,20 @@
+12/11/2024
+o LM358! ou MCP6292 ** 							[X]
+o Module convertisseur DC-DC XL4015 ** 					[ ]
+o CNA modèle MCP4921 ** 						[X]
+o Régulateur 7805 ** 							[X]
+o Capteur à circuit intégré DS18B20 					[x]
+o Module CAN ADS1115 ** 						[X]
+o Plaquette ESP32-DOIT-KIT-1V0 						[X]
+o 3 transistors** : 
+	1x 2N4401, 							[x]
+	1 IRUL014 et 							[ ]
+	1x IRF9540 							[x]
+o 2 dissipateurs de chaleur type « press fit » pour boîtier TO-220 	[X]
+o Résistances et condensateurs 						[ ]
+o Câble USB 								[X]
+o Bloc d’alimentation (incluant fils de raccord) 			[ ]
+o Multimètre HP 							[X]
+o Fils de divers calibres et longueurs. 				[ ]
+
+inventaire de l'enoncé est incomplet!! manque adc219!!
