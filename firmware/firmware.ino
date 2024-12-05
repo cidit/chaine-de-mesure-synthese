@@ -50,7 +50,7 @@
 
 //--- Definitions -------------------------------------------------------
 
-using CommandFunctionPtr = bool (*)(Decodeur &, Context &);
+
 
 //-----------------------------------------------------------------------
 
@@ -64,7 +64,7 @@ using CommandFunctionPtr = bool (*)(Decodeur &, Context &);
 
 //--- Objets --------------------------------------------
 
-Decodeur monDecodeur(&Serial);
+Decodeur cmdl(&Serial);
 
 //-----------------------------------------------------------------------
 
@@ -72,35 +72,7 @@ Decodeur monDecodeur(&Serial);
 
 //--- Section des routines specifiques ----------------------------------
 
-namespace commands {
 
-
-
-bool cmd_fan(Decodeur &cmdl) {
-  if (cmdl.getArgCount() == 0) {
-    // si pas de parametres, on toggle
-    fan::enabled = !fan::enabled;
-  } else {
-    auto arg0 = cmdl.getArg(0);
-    if (isnan(arg0)) {
-      // le deuxieme parametre n'est pas un chiffre
-      return false;
-    } else {
-      fan::speed = arg0;
-    }
-  }
-  return true;
-}
-
-struct Command {
-  char code;
-  CommandFunctionPtr fn;
-  String help_text;
-}
-
-static const Command commands = [
-    { 'F', &cmd_fan, "F [n] [s]: change the state of the fan. [n=which fan to manipulate] [s=the state to put it to, 1(on) or 0(off)]" }, 
-  ];
 
 /* 
  * Nom: Run Commands
@@ -113,24 +85,8 @@ static const Command commands = [
  */
 void run_commands(Decodeur &cmdl) {
   
-
-  if (!cmdl.available()) {
-    return;
-  }
-
-
-  const auto cmd = String(cmdl.getCommand()).toUpperCase()[0];
-
-  auto ack = false;
-  for (auto cmd_pair : commands) {
-    if (cmd_pair.first == cmd) {
-      ack = (*cmd_pair.second)(&cmdl);
-    }
-  }
-  Serial.println(ack ? "*" : "?");
 }
 
-}  // end namespace commands
 
 //-----------------------------------------------------------------------
 
@@ -141,9 +97,8 @@ void setup() {
 }  //Fin de setup()
 
 void loop() {
-  decodeur.refresh();
-  run_commands(decodeur);
+  cmdl.refresh();
+  run_commands(cmdl);
 }  //Fin de loop()
-   //-----------------------------------------------------------------------
 
-/* Version de modèle: B - Yh H23 */
+//-----------------------------------------------------------------------
