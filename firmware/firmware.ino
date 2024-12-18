@@ -54,7 +54,7 @@
 #include "util.hpp"
 #include "context.hpp"
 #include "commands.hpp"
-#include "sensors.hpp"
+#include "hardware_ctx.hpp"
 
 //-----------------------------------------------------------------------
 
@@ -70,13 +70,16 @@
 
 //--- Variables et Constantes --------------------------------------------------------
 
-const uint8_t ONEWIRE_BUS_P = 0, // TODO: use correct pins
-              CHIP_SELECT_P = 5, // IMPORTANT
-              MAIN_SWITCH_P = 0,
-              HOT_SIDE_FAN_P = 0,
-              COLD_SIDE_FAN_P = 0,
-              INA_I2C_ADDR = 0x40,
-              ADS_I2C_ADDR = 0x48;
+const uint8_t DS18B20_ONEWIRE_BUS_P = 4, //15,
+CHIP_SELECT_P = 5,
+MAIN_SWITCH_P = 26, //32,
+HOT_SIDE_FAN_P = 32, //25,
+COLD_SIDE_FAN_P = 33,//26,
+INA_I2C_ADDR = 0x40,
+ADS_I2C_ADDR = 0x48;
+const float COLD_REF_RESISTANCE = 9890,
+HOT_REF_RESISTANCE = 9852;
+const int ADC_GAIN = 0;
 
 //-----------------------------------------------------------------------
 
@@ -86,21 +89,30 @@ const uint8_t ONEWIRE_BUS_P = 0, // TODO: use correct pins
 
 Decodeur cmdl(&Serial);
 SPIClass spi = SPIClass(VSPI);
+OneWire onewire(DS18B20_ONEWIRE_BUS_P);
 
 Context ctx{
   String("L'incroyable  et faramineuse plaque peltier de felix, V0.0.1"),
   {
-    spi,
-    ADS1115(0x48),
+    &spi,
+    ADS1115(ADS_I2C_ADDR),
     MCP4921(&spi),
-    DallasTemperature(&OneWire(ONEWIRE_BUS_P)),
-    Adafruit_INA219(),
-    // Les états enabled s'auto initializent à false.
+    DallasTemperature(&onewire),
+    Adafruit_INA219(INA_I2C_ADDR),
+    {
+    // Les états d'activations s'auto-initializent à false.
+    0
+    },
+    WritePin(COLD_SIDE_FAN_P),
+    WritePin(HOT_SIDE_FAN_P),
+    WritePin(MAIN_SWITCH_P),
+    Thermistance(COLD_REF_RESISTANCE),
+    Thermistance(HOT_REF_RESISTANCE),
   },
-  WritePin(COLD_SIDE_FAN_P),
-  WritePin(HOT_SIDE_FAN_P),
-  WritePin(MAIN_SWITCH_P),
-  // Le reste s'auto initialize à zéro et à false.
+  {
+    // Les valeurs de capteurs s'auto-initializent à zéro.
+    0
+  },
 };
 Timer timer(250);
 
@@ -122,7 +134,6 @@ Timer timer(250);
  *
  */
 void run_commands(Decodeur& cmdl) {
-
 }
 
 
@@ -131,15 +142,15 @@ void run_commands(Decodeur& cmdl) {
 //--- Setup et Loop -----------------------------------------------------
 void setup() {
   Serial.begin(115200);
-  sensors::init_sensors(ctx, Serial);
+  init_hardware(ctx, Serial, ADC_GAIN, CHIP_SELECT_P);
 }  //Fin de setup()
 
 void loop() {
   cmdl.refresh();
-  commands::run_commands(cmdl, ctx, Serial);
+  run_commands(cmdl, ctx, Serial);
 
   if (timer.is_done(millis())) {
-    sensors::update_sensor_data(ctx);
+    update_sensor_data(ctx);
   }
 }  //Fin de loop()
 

@@ -7,6 +7,7 @@
 #include <MCP_DAC.h>
 
 #include "util.hpp"
+#include "hal.hpp"
 
 /**
  * // TODO
@@ -16,21 +17,24 @@ struct Context {
     String program_name;
 
     struct hardware_drivers {
-        SPIClass spi;
+        SPIClass *spi;
         ADS1X15 adc;
-        MCP_DAC dac;
+        MCP4921 dac;
         DallasTemperature dallas;
         Adafruit_INA219 ina;
+        /**
+         * Les états de controles des differents capteurs.
+         */
         struct {
             bool spi, adc, dac, dallas, ina;
         } enabled;
+        WritePin cold_fan,
+            hot_fan,
+            main_switch;
+        Thermistance cold_thermistance, hot_thermistance;
     } hardware_drivers;
 
 
-    WritePin cold_fan,
-        hot_fan,
-        main_switch;
-    float current_target;
     struct SensorData {
         float current_mA,
             tension_shunt_V,
