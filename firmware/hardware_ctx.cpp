@@ -32,10 +32,11 @@ void init_hardware(Context& ctx, Print& out, int adc_gain, int mcp_chipselect) {
 
     hw->spi->begin();
     hw->dac.begin(mcp_chipselect);
-    // hw->dac.setPercentage(50);
+    // vu que on n'a pas de moyen direct de tester si le dac fonctionne, on assume qu'il est en fonction.
     hw->enabled.dac = true;
 
     hw->dallas.begin();
+    // pareil pour le dallas.
     hw->enabled.dallas = true;
 
     if (hw->ina.begin()) {
@@ -46,6 +47,8 @@ void init_hardware(Context& ctx, Print& out, int adc_gain, int mcp_chipselect) {
         out.println("E: L'INA219 n'est pas branché ou son adresse est invalide.");
         hw->enabled.ina = false;
     }
+
+    // on met tout s'assure que l'etat de nos sorties sont biens toutes éteintes.
     reset_hardware(ctx);
 }
 
@@ -72,7 +75,6 @@ void update_sensor_data(Context& ctx) {
         v2 /=4;
         v3 /=4;
         v4 /=4;
-        
 
         sd->temperature_ambiant = hw->dallas.getTempCByIndex(0);
         if (sd->temperature_ambiant == DEVICE_DISCONNECTED_C) {
@@ -80,10 +82,6 @@ void update_sensor_data(Context& ctx) {
         }
         sd->temperature_cold = hw->cold_thermistance.get_temperature(v1, v2);
         sd->temperature_hot = hw->hot_thermistance.get_temperature(v3, v4);
-//        Serial.println("v1 " +String(v1));
-//        Serial.println("v2 " +String(v2));
-//        Serial.println("v3 " +String(v3));
-//        Serial.println("v4 " +String(v4));
     }
 
     if (hw->enabled.ina) {

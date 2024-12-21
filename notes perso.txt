@@ -1,0 +1,3 @@
+quand le commutateur principal est eteint, eteindre aussi les 
+ventilateurs manuellements et mettre la consigne de courant à zero
+- Conseil de Jude
